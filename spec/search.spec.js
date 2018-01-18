@@ -20,6 +20,11 @@ describe("Searcher", function() {
       'operator': 'anyof'
     }
   ];
+  var searchExpression = [
+      ['displayname', 'is', 'VENDOR-STYLE-SIZE' ],
+      'and',
+      ['upccode', 'anyof', ['123456789012', '098765432109']]
+  ];
   var searchColumns = [
     {
       'name': 'custitem22',
@@ -42,6 +47,7 @@ describe("Searcher", function() {
   describe('#init(recordType, batchSize, lowerBound, searchFilters, searchColumns', function() {
 
     beforeEach(function() {
+      spyOn(Searcher.prototype, 'createFilters').andCallThrough();
       spyOn(Searcher.prototype, 'createSearchFilters');
       spyOn(Searcher.prototype, 'generateLowerBoundFilter');
       spyOn(Searcher.prototype, 'createSearchColumns');
@@ -170,6 +176,38 @@ describe("Searcher", function() {
 
   });
 
+  describe('#init(recordType, batchSize, lowerBound, searchFilters, searchColumns, advancedOptions', function() {
+
+        beforeEach(function() {
+            spyOn(Searcher.prototype, 'createFilters').andCallThrough();
+            spyOn(Searcher.prototype, 'createSearchFilters');
+            spyOn(Searcher.prototype, 'generateLowerBoundFilter');
+            spyOn(Searcher.prototype, 'createSearchColumns');
+            spyOn(Searcher.prototype, 'generateSortColumn');
+
+            var advancedOptions = {
+                useFilterExpressions: true,
+                groupJoins: true
+            };
+            this.newSearcher = new Searcher(recordType, batchSize, lowerBound,
+                searchExpression, searchColumns, advancedOptions);
+        });
+
+        it("should set the searchFilters to an provided Expression", function() {
+            expect(this.newSearcher.searchFilters).toEqual(searchExpression);
+        });
+
+        it("should NOT call createSearchFilters", function() {
+            expect(this.newSearcher.createSearchFilters).not.toHaveBeenCalled();
+        });
+
+        it("should NOT call generateLowerBoundFilter", function() {
+            expect(this.newSearcher.generateLowerBoundFilter).not.toHaveBeenCalled();
+        });
+
+    });
+
+
   describe('#createSearchFilters', function() {
 
     beforeEach(function() {
@@ -291,7 +329,7 @@ describe("Searcher", function() {
         spyOn(searcher, 'getSearchFilterObject').andReturn(netsuiteSearchFilterObject);
         searcher.generateLowerBoundFilter();
       });
-      
+
       it("should call getSearchFilterObject with the current lowerBound", function() {
         expect(searcher.getSearchFilterObject).toHaveBeenCalledWith(this.searchFilterData);
       });
@@ -518,6 +556,29 @@ describe("Searcher", function() {
 
   });
 
+  describe('#searchIteration (Group join)', function() {
+      it("should call appendResultsGroupJoins", function() {
+          this.resultsBlock = [{}];
+          spyOn(searcher, 'appendResultsGroupJoins');
+          searcher.advancedOptions = {
+              groupJoins: true
+          };
+          searcher.appendResults(this.resultsBlock);
+          expect(searcher.appendResultsGroupJoins).toHaveBeenCalledWith(this.resultsBlock);
+      });
+
+      it("should NOT call appendResultsGroupJoins", function() {
+          this.resultsBlock = [{}];
+          spyOn(searcher, 'appendResultsGroupJoins');
+          searcher.advancedOptions = {
+              groupJoins: false
+          };
+          searcher.appendResults(this.resultsBlock);
+          expect(searcher.appendResultsGroupJoins).not.toHaveBeenCalled();
+      });
+    });
+
+
   describe('#isExecutionDone(resultsBlock)', function() {
 
     it("should be true if resultsBlock is undefined", function() {
@@ -622,7 +683,7 @@ describe("Searcher", function() {
       this.resultsBlock = ([{}, {}, {}, {}, this.resultRow]);
       this.recordId = searcher.extractLowerBound(this.resultsBlock);
     });
-    
+
     it("should call getId on the resultRow", function() {
       expect(this.resultRow.getId).toHaveBeenCalled();
     });
