@@ -33,7 +33,7 @@ describe('Upserter', function() {
     });
 
     it('should initialize the reply_list as an empty Array', function() {
-      expect(upserter.reply_list).toEqual([]); 
+      expect(upserter.reply_list).toEqual([]);
     });
 
     it('should initialize the exception to null', function() {
@@ -115,7 +115,7 @@ describe('Upserter', function() {
     });
 
     it('should call formatReply on NetsuiteToolkit', function() {
-      expect(NetsuiteToolkit.formatReply).toHaveBeenCalledWith(upserter.params, upserter.replyList);
+      expect(NetsuiteToolkit.formatReply).toHaveBeenCalledWith(upserter.params, upserter.reply_list);
     });
 
     it('should return the output of formatreply', function() {
@@ -296,7 +296,7 @@ describe('UpsertRequest', function() {
       spyOn(this.fake_processor, 'execute');
       upsert_request.executeSublistProcessor(sublist_one);
     });
-  
+
     it('should call the constructor of NetsuiteToolkit.SublistProcessor', function() {
       expect(NetsuiteToolkit.SublistProcessor).toHaveBeenCalledWith(upsert_request.record,
                                                                     sublist_one);

@@ -20,3 +20,5 @@ log/*.log
 tags
 tmp
 npm-debug.log
+
+.idea
