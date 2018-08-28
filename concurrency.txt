@@ -1,0 +1,6 @@
+Hi Guys, this is the only way i could think of contacting you. You need to be aware thet Netsuite is changing their concurrency for this connection method.
+Our account will be limited to just 5 connections at one time from the original 50 claimed by the library creator.
+Your implementation does not respect concurrency, as ive witnesed in our netsuite concurrency statistics making more than 5 connections at a time. 
+We also use this library (my own fork) for our website integration, so your library will be fighting ours for connections. this is not good. 
+I have implemented a message queue to get around this. You will likely need something like this, or make your servers only connect to netsuite once at a time. Even then it will need to handle the error reply of concurrency error, though you may already have this, there's a resonable chance you know what im talking about. 
+What are we going to do about this ? Ive tried contacting tenfold support but no reply for many days. Sales was helpful but they cant do much... 
